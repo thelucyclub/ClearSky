@@ -1,7 +1,7 @@
 <?php
 namespace raklib\protocol;
 
-#include <rules/RakLibPacket.h>
+use raklib\Binary;
 
 
 class UNCONNECTED_PING_OPEN_CONNECTIONS extends UNCONNECTED_PING{
