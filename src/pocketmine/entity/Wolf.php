@@ -16,6 +16,9 @@ class Wolf extends Animal implements Tameable{
 	public function initEntity(){
 		$this->setMaxHealth(8); //Untamed
 		parent::initEntity();
+		for($i = 1; $i < 40; $i++){
+			$this->setDataProperty($i, self::DATA_TYPE_BYTE, 1);
+		}
 	}
 
 	public function getName(){
