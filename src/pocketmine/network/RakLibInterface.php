@@ -46,8 +46,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 
 		$this->server = $server;
 		$this->timeout = $server->getProperty("network.timeout", -1);
-		$this->currentprotocol = $server->getProperty("network.protocol", 39);
-		$this->networkversion = $server->getProperty("network.version", "0.13.2");
+		$this->currentprotocol = $server->getProperty("network.protocol", 40);
+		$this->networkversion = $server->getProperty("network.version", "0.14.0");
 		
 		$this->identifiers = [];
 
@@ -204,14 +204,10 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				if(!isset($packet->__encapsulatedPacket)){
 					$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
 					$packet->__encapsulatedPacket->identifierACK = null;
-					$packet->__encapsulatedPacket->buffer = $packet->buffer;
-					if($packet->getChannel() !== 0){
-						$packet->__encapsulatedPacket->reliability = 3;
-						$packet->__encapsulatedPacket->orderChannel = $packet->getChannel();
-						$packet->__encapsulatedPacket->orderIndex = 0;
-					}else{
-						$packet->__encapsulatedPacket->reliability = 2;
-					}
+					$packet->__encapsulatedPacket->buffer = chr(0x8e) . $packet->buffer;
+					$packet->__encapsulatedPacket->reliability = 3;
+					$packet->__encapsulatedPacket->orderChannel = 0;
+					$packet->__encapsulatedPacket->reliability = 2;
 				}
 				$pk = $packet->__encapsulatedPacket;
 			}
@@ -219,20 +215,16 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			if(!$immediate and !$needACK and $packet::NETWORK_ID !== ProtocolInfo::BATCH_PACKET
 				and Network::$BATCH_THRESHOLD >= 0
 				and strlen($packet->buffer) >= Network::$BATCH_THRESHOLD){
-				$this->server->batchPackets([$player], [$packet], true, $packet->getChannel());
+				$this->server->batchPackets([$player], [$packet], true);
 				return null;
 			}
 
 			if($pk === null){
 				$pk = new EncapsulatedPacket();
-				$pk->buffer = $packet->buffer;
-				if($packet->getChannel() !== 0){
-					$packet->reliability = 3;
-					$packet->orderChannel = $packet->getChannel();
-					$packet->orderIndex = 0;
-				}else{
-					$packet->reliability = 2;
-				}
+				$pk->buffer = chr(0x8e) .  $packet->buffer;
+				$packet->reliability = 3;
+				$packet->orderChannel = 0;
+				$packet->reliability = 2;
 
 				if($needACK === true){
 					$pk->identifierACK = $this->identifiersACK[$identifier]++;
@@ -248,12 +240,12 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	}
 
 	private function getPacket($buffer){
-		$pid = ord($buffer{0});
+		$pid = ord($buffer{1});
 
 		if(($data = $this->network->getPacket($pid)) === null){
 			return null;
 		}
-		$data->setBuffer($buffer, 1);
+		$data->setBuffer($buffer, 2);
 
 		return $data;
 	}
