@@ -9,6 +9,7 @@ settings:
  force-language: false
  #Whether to send all strings translated to server locale or let the device handle them
  shutdown-message: "Server closed"
+ whitelist-reason: "Server is whitelisted"
  query-plugins: true
  #Allow listing plugins via Query
  deprecated-verbose: true
