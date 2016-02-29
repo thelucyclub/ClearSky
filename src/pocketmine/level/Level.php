@@ -101,6 +101,7 @@ use pocketmine\entity\Effect;
 use pocketmine\level\particle\DestroyBlockParticle;
 
 use pocketmine\entity\ExperienceOrb;
+use pocketmine\level\ai\AI;
 
 #include <rules/Level.h>
 
@@ -281,6 +282,9 @@ class Level implements ChunkManager, Metadatable{
 	private $raintime = [];
 	private $rainfall = [];
 	private $weatherexectick = 0;
+	
+	/** AI **/
+	private $AI;
 
 	private function generateWeather(){
 		if($this->getServer()->getProperty("level-settings.weather.enable", true)){
@@ -473,6 +477,8 @@ class Level implements ChunkManager, Metadatable{
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
 		$this->tickRate = 1;
+		
+		$this->AI = new AI($this);
 	}
 
 	public function getTickRate(){
@@ -537,6 +543,14 @@ class Level implements ChunkManager, Metadatable{
 	 */
 	final public function getId(){
 		return $this->levelId;
+	}
+	
+	/**
+	 * Return Level AI
+	 */
+	
+	final public function getAI(){
+		return $this->AI;
 	}
 
 	public function close(){
@@ -847,6 +861,7 @@ class Level implements ChunkManager, Metadatable{
 				}
 			}
 		}
+		$this->AI->tickMobs();
 		Timings::$tickTileEntityTimer->stopTiming();
 		$this->timings->tileEntityTick->stopTiming();
 

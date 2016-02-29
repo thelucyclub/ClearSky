@@ -19,11 +19,17 @@ class Zombie extends Monster{
 
 	public function initEntity(){
 		$this->setMaxHealth(20);
+		$this->getLevel()->getAI()->registerAI($this);
 		parent::initEntity();
 	}
 
 	public function getName(){
 		return "Zombie";
+	}
+	
+	public function kill(){
+		$this->getLevel()->getAI()->unregisterAI($this);
+		parent::kill();
 	}
 
 	public function spawnTo(Player $player){
